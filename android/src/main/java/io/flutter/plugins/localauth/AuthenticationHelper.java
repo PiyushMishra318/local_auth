@@ -20,6 +20,7 @@ import android.provider.Settings;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.core.content.ContextCompat;
@@ -201,31 +202,12 @@ class AuthenticationHelper extends FingerprintManagerCompat.AuthenticationCallba
     if (cancellationSignal.isCanceled() || !fingerprintDialog.isShowing()) {
       return;
     }
-    TextView resultInfo = (TextView) fingerprintDialog.findViewById(R.id.fingerprint_status);
-    ImageView icon = (ImageView) fingerprintDialog.findViewById(R.id.fingerprint_icon);
-    switch (state) {
-      case FAILURE:
-        icon.setImageResource(R.drawable.fingerprint_warning_icon);
-        resultInfo.setTextColor(ContextCompat.getColor(activity, R.color.warning_color));
-        break;
-      case SUCCESS:
-        icon.setImageResource(R.drawable.fingerprint_success_icon);
-        resultInfo.setTextColor(ContextCompat.getColor(activity, R.color.success_color));
-        break;
-    }
-    resultInfo.setText(message);
+    
   }
 
   // Suppress inflateParams lint because dialogs do not need to attach to a parent view.
   @SuppressLint("InflateParams")
   private void showFingerprintDialog() {
-    View view = LayoutInflater.from(activity).inflate(R.layout.scan_fp, null, false);
-    TextView fpDescription = (TextView) view.findViewById(R.id.fingerprint_description);
-    TextView title = (TextView) view.findViewById(R.id.fingerprint_signin);
-    TextView status = (TextView) view.findViewById(R.id.fingerprint_status);
-    fpDescription.setText((String) call.argument("localizedReason"));
-    title.setText((String) call.argument("signInTitle"));
-    status.setText((String) call.argument("fingerprintHint"));
     Context context = new ContextThemeWrapper(activity, R.style.AlertDialogCustom);
     OnClickListener cancelHandler =
         new OnClickListener() {
@@ -236,10 +218,8 @@ class AuthenticationHelper extends FingerprintManagerCompat.AuthenticationCallba
         };
     fingerprintDialog =
         new AlertDialog.Builder(context)
-            .setView(view)
-            .setNegativeButton((String) call.argument(CANCEL_BUTTON), cancelHandler)
-            .setCancelable(false)
             .show();
+    fingerprintDialog.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND‌​);
   }
 
   // Suppress inflateParams lint because dialogs do not need to attach to a parent view.
